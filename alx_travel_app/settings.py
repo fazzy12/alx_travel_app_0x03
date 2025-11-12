@@ -15,9 +15,17 @@ from pathlib import Path
 
 # Initialize environment variables
 env = environ.Env(
-    
+    # Set casting and default values
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+    DB_PORT=(int, 3306),
+    CORS_ALLOWED_ORIGINS=(list, []),
+    SECURE_SSL_REDIRECT=(bool, False),
+    SESSION_COOKIE_SECURE=(bool, False),
+    CSRF_COOKIE_SECURE=(bool, False),
+
+    # New: Celery/Queue Configuration
     CELERY_BROKER_URL=(str, 'amqp://guest:guest@localhost:5672//'),
-    
     
     # New: Email Configuration (using console backend for development/testing)
     EMAIL_BACKEND=(str, 'django.core.mail.backends.console.EmailBackend'), 
@@ -27,15 +35,6 @@ env = environ.Env(
     EMAIL_HOST_USER=(str, ''),
     EMAIL_HOST_PASSWORD=(str, ''),
     DEFAULT_FROM_EMAIL=(str, 'support@alxtravelapp.com'),
-    
-    # Set casting and default values
-    DEBUG=(bool, False),
-    ALLOWED_HOSTS=(list, []),
-    DB_PORT=(int, 3306),
-    CORS_ALLOWED_ORIGINS=(list, []),
-    SECURE_SSL_REDIRECT=(bool, False),
-    SESSION_COOKIE_SECURE=(bool, False),
-    CSRF_COOKIE_SECURE=(bool, False),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -96,23 +95,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-
-CELERY_BROKER_URL = env('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = TIME_ZONE
-
-# --- NEW EMAIL CONFIGURATION ---
-EMAIL_BACKEND = env('EMAIL_BACKEND')
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = env('EMAIL_PORT')
-EMAIL_USE_TLS = env('EMAIL_USE_TLS')
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
 ROOT_URLCONF = 'alx_travel_app.urls'
 
@@ -200,6 +182,23 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# --- Celery Configuration ---
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL  # Use the same broker for results
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE # Use the global TIME_ZONE variable
+
+# --- Email Configuration ---
+EMAIL_BACKEND = env('EMAIL_BACKEND')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+
 # REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -224,8 +223,6 @@ REST_FRAMEWORK = {
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 
-# Alternative: Allow all origins in development (NOT for production)
-# CORS_ALLOW_ALL_ORIGINS = True
 
 # Additional CORS settings
 CORS_ALLOW_CREDENTIALS = True
